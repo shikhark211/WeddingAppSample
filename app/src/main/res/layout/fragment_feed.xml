@@ -1,0 +1,39 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/fl"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    tools:context="com.shikhar.weddingappsample.FeedFragment"
+    android:orientation="vertical">
+        <!--<include layout="@layout/app_bar"-->
+        <!--android:id="@+id/app_bar"></include>-->
+        <!-- TODO: Update blank fragment layout -->
+        <!--<TextView android:layout_width="match_parent" android:layout_height="0dp"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text="@string/HotOffers"-->
+            <!--android:layout_marginTop="12dp"-->
+            <!--android:layout_marginBottom="12dp"-->
+            <!--android:layout_marginLeft="6dp"-->
+
+            <!--android:textSize="20sp"-->
+            <!--android:textColor="@color/primary_text"/>-->
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/home_recycler_view"></android.support.v7.widget.RecyclerView>
+
+    <com.melnykov.fab.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_action"
+        fab:fab_colorNormal="@color/pink_400"
+        fab:fab_colorPressed="@color/pink_700"/>
+        <!--fab:fab_colorRipple="@color/red_600" -->
+
+    </FrameLayout>
+
