@@ -1,26 +1,36 @@
 package Models;
 
+import android.graphics.Bitmap;
+
 /**
  * Created by shikharkhetan on 8/25/15.
  */
 public class Post {
-    public Post(String user, String description, int imageId) {
+
+
+    public Post(String user, String description, Bitmap image) {
+        this.image = image;
         this.user = user;
+        this.imageId = 0;
+
         this.description = description;
-        this.imageId = imageId;
+    }
+
+    Bitmap image;
+
+    public Bitmap getImage() {
+        return image;
+    }
+
+    public void setImage(Bitmap image) {
+        this.image = image;
     }
 
     String user;
     String description;
     int imageId;
 
-    public int getImageId() {
-        return imageId;
-    }
 
-    public void setImageId(int imageId) {
-        this.imageId = imageId;
-    }
 
     public String getDescription() {
         return description;

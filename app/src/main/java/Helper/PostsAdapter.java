@@ -2,6 +2,7 @@ package Helper;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -45,7 +46,7 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
 
         holder.username.setText(posts.get(position).getUser());
         holder.description.setText(posts.get(position).getDescription());
-        holder.postPhoto.setImageResource(posts.get(position).getImageId());
+        holder.postPhoto.setImageBitmap(posts.get(position).getImage());
         holder.download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
