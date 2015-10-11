@@ -1,9 +1,13 @@
 package com.shikhar.weddingappsample;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,15 +19,20 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
 import com.facebook.Profile;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.parse.FindCallback;
 import com.parse.GetCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.squareup.picasso.Picasso;
+
+import java.io.File;
+import java.util.List;
+
+import Helper.CircleTransform;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -32,6 +41,8 @@ public class LoginActivity extends AppCompatActivity {
     LoginButton loginButton;
     ImageView dp;
     Profile profile = null;
+    myHelper Helper;
+    SQLiteDatabase db;
     CallbackManager callbackManager;
     SharedPreferences sp;
 
@@ -39,35 +50,15 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_login);
-        Parse.enableLocalDatastore(this);
-        Parse.initialize(this, "OCvhok5Gh0FhJhfAA6cKWysZiL53xehGC9zM3OO1", "EmROHXSF6RclFFvsZXu30qv9ZMPbWBI2a25LyCYF");
+        Helper = new myHelper(getApplicationContext());
+        db = Helper.getWritableDatabase();
         sp = getSharedPreferences("USER", Context.MODE_PRIVATE);
-        textView = (TextView) findViewById(R.id.textview);
         loginButton = (LoginButton) findViewById(R.id.login_button);
         loginButton.setReadPermissions("user_friends");
         callbackManager = CallbackManager.Factory.create();
+       // textView = (TextView) findViewById(R.id.login_textview);
         loginButton.registerCallback(callbackManager, mcallback);
-
-//        ParseQuery<ParseObject> query = ParseQuery.getQuery("InviteeProfile");
-//        query.findInBackground(new FindCallback<ParseObject>() {
-//            @Override
-//            public void done(List<ParseObject> list, ParseException e) {
-//                if (e == null) {
-//                    for(int i=0;i<list.size();i++){
-//                        ParseObject inviteeList = new ParseObject("InviteeListinDataBase");
-//                        inviteeList.put("Name", list.get(i).get("Name"));
-//                        inviteeList.put("Id", list.get(i).get("Id"));
-//                        inviteeList.pinInBackground();
-//                        Toast.makeText(getApplicationContext(), inviteeList.get("Name")+"",Toast.LENGTH_SHORT).show();
-//                    }
-//                } else {
-//                    // something went wrong
-//                    textView.setText("ERROR");
-//                }
-//            }
-//        });
 
     }
 
@@ -87,26 +78,42 @@ public class LoginActivity extends AppCompatActivity {
             if(profile!=null){
                 SharedPreferences.Editor editor = sp.edit();
                 editor.putString("UserName", profile.getFirstName());
-
+                editor.putString("UserFbId", profile.getId());
+                if(sp.getBoolean("fileExists", false)==false){
+                    File folder = new File(Environment.getExternalStorageDirectory() + "/Wedding App");
+                    folder.mkdir();
+                    editor.putBoolean("fileExists",true);
+                }
                 editor.commit();
                 ParseQuery<ParseObject> query = ParseQuery.getQuery("InviteeProfile");
-                query.whereEqualTo("Id", profile.getLinkUri().toString());
+                query.whereEqualTo("Id", profile.getId());
                 query.getFirstInBackground(new GetCallback<ParseObject>() {
                     public void done(ParseObject object, ParseException e) {
                         if (object == null) {
                             ParseObject inviteeProfile = new ParseObject("InviteeProfile");
                             inviteeProfile.put("Name", profile.getName());
-                            inviteeProfile.put("Id", profile.getLinkUri().toString());
-                            inviteeProfile.put("fb_dp",profile.getProfilePictureUri(1,1).toString());
+                            inviteeProfile.put("Id", profile.getId());
                             inviteeProfile.saveInBackground();
+
+
                         } else {
                             Toast.makeText(getApplicationContext(), "already there", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
-                Intent i = new Intent();
-                i.setClass(getApplicationContext(), MainActivity.class);
-                startActivity(i);
+                ImageView imageView = (ImageView) findViewById(R.id.user_dp);
+                Picasso.with(getApplicationContext()).load("https://graph.facebook.com/" + profile.getId() + "/picture?type=large").placeholder(R.mipmap.ic_launcher).transform(new CircleTransform()).into(imageView);
+                fetchInviteeFromServer();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                /* Create an Intent that will start the Menu-Activity. */
+                        Intent i = new Intent();
+                        i.setClass(getApplicationContext(), MainActivity.class);
+                        startActivity(i);
+                    }
+                }, 5000);
+
             }
         }
 
@@ -120,6 +127,9 @@ public class LoginActivity extends AppCompatActivity {
             textView.setText("err"+e);
         }
     };
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -141,5 +151,26 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+    public void fetchInviteeFromServer(){
+        ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("InviteeProfile");
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null) {
+                    if(db!=null){
+                        db.execSQL("DELETE FROM " + myHelper.Table_Name);
+                    }
+                    for (int i = 0; i < list.size(); i++) {
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(Helper.InviteeName,list.get(i).getString("Name"));
+                        contentValues.put(Helper.InviteeId,list.get(i).getString("Id"));
+                        db.insert(Helper.Table_Name, null, contentValues);
+                    }
+                } else {
+
+                }
+            }
+        });
     }
 }

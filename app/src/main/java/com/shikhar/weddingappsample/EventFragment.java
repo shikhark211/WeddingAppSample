@@ -29,7 +29,7 @@ public class EventFragment extends android.support.v4.app.Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        eventList = new ArrayList<>();
+        eventList = new ArrayList<Event>();
         View view = inflater.inflate(R.layout.fragment_event, container, false);
         String EventName = "HALDI";
         Drawable EventPhoto = getResources().getDrawable(R.drawable.haldiimages);

@@ -1,22 +1,24 @@
 package com.shikhar.weddingappsample;
 
-import java.util.Locale;
-
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.ActionBar;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-import android.view.Gravity;
-import android.view.LayoutInflater;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+
+import com.facebook.AccessToken;
+import com.facebook.login.LoginManager;
+
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements ActionBar.TabListener {
 
@@ -34,6 +36,8 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
      * The {@link ViewPager} that will host the section contents.
      */
     ViewPager mViewPager;
+    SharedPreferences sp;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
+        sp = getSharedPreferences("USER", Context.MODE_PRIVATE);
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
@@ -73,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
                             .setTabListener(this));
         }
+//        LoginManager.getInstance();
     }
 
 
@@ -93,6 +98,35 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }
+        if (id == R.id.action_logout) {
+            AccessToken accessToken = AccessToken.getCurrentAccessToken();
+            SharedPreferences.Editor editor = sp.edit();
+            editor.remove("UserName").commit();
+            if(accessToken!=null){
+                LoginManager.getInstance().logOut();
+                Intent intent = new Intent();
+                intent.setClass(this,LoginActivity.class);
+                startActivity(intent);
+            }else{
+                Intent intent = new Intent();
+                intent.setClass(this,LoginActivity.class);
+                startActivity(intent);
+            }
+        }
+        if(id==R.id.action_invitee_list){
+            Intent intent = new Intent();
+            intent.setClass(this,InviteeList.class);
+            startActivity(intent);
+        }
+        if(id==R.id.action_send_invitation){
+            Uri uri = Uri.parse("android.resource://com.shikhar.weddingappsample/drawable/ic_action");
+            Intent shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+            shareIntent.setType("image/jpeg");
+            startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.send_to)));
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -131,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
             switch (position)   {
                 case 0: return new FeedFragment();
                 case 1: return new EventFragment();
-                case 2: return new FeedFragment();
+                case 2: return new EventFragment();
                 default:return new FeedFragment();
             }
         }

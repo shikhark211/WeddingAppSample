@@ -1,28 +1,43 @@
 package com.shikhar.weddingappsample;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.facebook.FacebookSdk;
+import com.parse.Parse;
+
 public class SplashScreenActivity extends AppCompatActivity {
 
+
+    SharedPreferences sp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_splash_screen);
+        Parse.initialize(this, "OCvhok5Gh0FhJhfAA6cKWysZiL53xehGC9zM3OO1", "EmROHXSF6RclFFvsZXu30qv9ZMPbWBI2a25LyCYF");
+        sp = getSharedPreferences("USER", Context.MODE_PRIVATE);
         new Handler().postDelayed(new Runnable()
         {
             @Override
             public void run() {
                 /* Create an Intent that will start the Menu-Activity. */
-                Intent mainIntent = new Intent(SplashScreenActivity.this, MainActivity.class);
+                Intent mainIntent;
+                if(sp.getString("UserName",null)==null){
+                    mainIntent = new Intent(SplashScreenActivity.this, LoginActivity.class);
+                }else {
+                    mainIntent = new Intent(SplashScreenActivity.this, MainActivity.class);
+                }
                 SplashScreenActivity.this.startActivity(mainIntent);
                 SplashScreenActivity.this.finish();
             }
-        }, 3000);
+        }, 1000);
 
     }
 

@@ -9,6 +9,9 @@
     <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
 
     </style>
+    <style name="LoginTheme" parent="Theme.AppCompat.Light.NoActionBar">
+
+    </style>
     <style name="customToolbar" parent="ThemeOverlay.AppCompat.Dark">
 
         <item name="android:textColorPrimary">@color/white</item>
