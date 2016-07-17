@@ -7,6 +7,8 @@ import android.content.pm.Signature;
 import android.util.Base64;
 import android.util.Log;
 
+import com.parse.Parse;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -18,7 +20,9 @@ public class Myapplication extends Application {
     @Override
 
     public void onCreate() {
+
         super.onCreate();
+        Parse.initialize(this, "OCvhok5Gh0FhJhfAA6cKWysZiL53xehGC9zM3OO1", "EmROHXSF6RclFFvsZXu30qv9ZMPbWBI2a25LyCYF");
 
         try {
             PackageInfo info = null;

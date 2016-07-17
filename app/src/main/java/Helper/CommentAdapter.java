@@ -41,8 +41,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
-        Picasso.with(context).load("https://graph.facebook.com/" + commentList.get(i).getDpId() + "/picture?type=small")
-                .placeholder(R.mipmap.ic_launcher)
+        Picasso.with(context).load("https://graph.facebook.com/" + commentList.get(i).getDpId() + "/picture?type=normal")
+                .placeholder(R.drawable.appicon)
                 .transform(new CircleTransform())
                 .into(viewHolder.commentrphoto);
         viewHolder.commentrName.setText(commentList.get(i).getName());

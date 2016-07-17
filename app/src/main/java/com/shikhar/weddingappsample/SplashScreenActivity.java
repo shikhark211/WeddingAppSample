@@ -8,9 +8,13 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.facebook.FacebookSdk;
-import com.parse.Parse;
+import com.squareup.picasso.Picasso;
+
+import Helper.CircleTransform;
 
 public class SplashScreenActivity extends AppCompatActivity {
 
@@ -19,10 +23,16 @@ public class SplashScreenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        View decorView = getWindow().getDecorView();
+//        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+//        decorView.setSystemUiVisibility(uiOptions);
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_splash_screen);
-        Parse.initialize(this, "OCvhok5Gh0FhJhfAA6cKWysZiL53xehGC9zM3OO1", "EmROHXSF6RclFFvsZXu30qv9ZMPbWBI2a25LyCYF");
+       // Parse.initialize(this, "OCvhok5Gh0FhJhfAA6cKWysZiL53xehGC9zM3OO1", "EmROHXSF6RclFFvsZXu30qv9ZMPbWBI2a25LyCYF");
         sp = getSharedPreferences("USER", Context.MODE_PRIVATE);
+        ImageView weddingCouple = (ImageView) findViewById(R.id.weddingCouple);
+        Picasso.with(this).load(R.drawable.os8).centerCrop().fit().transform(new CircleTransform()).into(weddingCouple);
         new Handler().postDelayed(new Runnable()
         {
             @Override
@@ -37,7 +47,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                 SplashScreenActivity.this.startActivity(mainIntent);
                 SplashScreenActivity.this.finish();
             }
-        }, 1000);
+        }, 3000);
 
     }
 
@@ -56,9 +66,7 @@ public class SplashScreenActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+
 
         return super.onOptionsItemSelected(item);
     }

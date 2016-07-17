@@ -12,11 +12,14 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
+import com.orhanobut.dialogplus.DialogPlus;
+import com.orhanobut.dialogplus.ViewHolder;
 
 import java.util.Locale;
 
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
     SharedPreferences sp;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +51,8 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
+        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setDisplayShowTitleEnabled(false);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -55,6 +60,9 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+
+
+
 
         // When swiping between different sections, select the corresponding
         // tab. We can also use ActionBar.Tab#select() to do this if we have
@@ -65,7 +73,6 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
                 actionBar.setSelectedNavigationItem(position);
             }
         });
-
         // For each of the sections in the app, add a tab to the action bar.
         for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
             // Create a tab with text corresponding to the page title defined by
@@ -84,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+//        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -95,10 +102,7 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+
         if (id == R.id.action_logout) {
             AccessToken accessToken = AccessToken.getCurrentAccessToken();
             SharedPreferences.Editor editor = sp.edit();
@@ -120,13 +124,23 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
             startActivity(intent);
         }
         if(id==R.id.action_send_invitation){
-            Uri uri = Uri.parse("android.resource://com.shikhar.weddingappsample/drawable/ic_action");
+            Uri uri = Uri.parse("android.resource://com.shikhar.weddingappsample/drawable/invitation");
             Intent shareIntent = new Intent();
             shareIntent.setAction(Intent.ACTION_SEND);
             shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
             shareIntent.setType("image/jpeg");
             startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.send_to)));
 
+        }
+        if(id==R.id.action_see_invitation){
+            DialogPlus dialog = DialogPlus.newDialog(this)
+                    .setContentHolder(new ViewHolder(R.layout.invitation))
+                    .setGravity(Gravity.CENTER)
+                    .setCancelable(true)
+                    .setExpanded(true)
+                    .create();
+
+            dialog.show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -165,7 +179,8 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
             switch (position)   {
                 case 0: return new FeedFragment();
                 case 1: return new EventFragment();
-                case 2: return new EventFragment();
+                case 2: return new OurWeddingFragment1();
+                case 3: return new InviteeFragment();
                 default:return new FeedFragment();
             }
         }
@@ -173,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 3;
+            return 4;
         }
 
         @Override
@@ -186,6 +201,8 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
                     return getString(R.string.title_section2).toUpperCase(l);
                 case 2:
                     return getString(R.string.title_section3).toUpperCase(l);
+                case 3:
+                    return "Invitee".toUpperCase(l);
             }
             return null;
         }
@@ -194,4 +211,6 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
     /**
      * A placeholder fragment containing a simple view.
      */
+
+
 }

@@ -12,5 +12,9 @@ public class Event {
     String EventMonth;
     String EventTime;
     String EventVenue;
+    String Latitude;
+    String Longitude;
+    String LocationNickname;
+    String CompleteLocation;
     String EventDiscription;
 }

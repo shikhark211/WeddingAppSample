@@ -13,14 +13,24 @@ public class Post {
     Bitmap image;
     String uploaderFbId;
     byte[] bytes;
+    String imageUrl;
 
-    public Post(String uploaderName,String uploaderFbId,String description,String feedId, Bitmap image,byte[] bytes) {
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+
+    public Post(String uploaderName,String uploaderFbId,String description,String feedId) {
         this.uploaderName = uploaderName;
-        this.bytes = bytes;
+        //this.bytes = bytes;
         this.uploaderFbId = uploaderFbId;
         this.description = description;
         this.feedId = feedId;
-        this.image = image;
+       // this.image = image;
     }
 
 

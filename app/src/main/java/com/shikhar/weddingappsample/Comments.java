@@ -71,9 +71,7 @@ public class Comments extends ActionBarActivity implements View.OnClickListener 
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -86,6 +84,13 @@ public class Comments extends ActionBarActivity implements View.OnClickListener 
             a.put("UploaderProfile", sp.getString("UserFbId", null));
             a.put("Comment", editText.getText().toString());
             a.saveInBackground();
+            String name = sp.getString("UserName", null);
+            String id = sp.getString("UserFbId", null);
+            String comment = editText.getText().toString();
+            CommentTemplate template = new CommentTemplate(name,id,comment);
+            commentList.add(template);
+            commentAdapter.notifyDataSetChanged();
+            Toast.makeText(this," Done ",Toast.LENGTH_LONG).show();
         }else{
             Toast.makeText(this,"Comment is Empty",Toast.LENGTH_SHORT).show();
         }

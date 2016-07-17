@@ -1,5 +1,7 @@
 package com.shikhar.weddingappsample;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -8,12 +10,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -30,9 +32,12 @@ import com.parse.ParseQuery;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import Helper.CircleTransform;
+import Models.Reminder;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -40,8 +45,9 @@ public class LoginActivity extends AppCompatActivity {
     Boolean checkLogin ;
     LoginButton loginButton;
     ImageView dp;
-    Profile profile = null;
+    Profile profile;
     myHelper Helper;
+    Context context;
     SQLiteDatabase db;
     CallbackManager callbackManager;
     SharedPreferences sp;
@@ -50,17 +56,25 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        View decorView = getWindow().getDecorView();
+//        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+//        decorView.setSystemUiVisibility(uiOptions);
         setContentView(R.layout.activity_login);
-        Helper = new myHelper(getApplicationContext());
+        Helper = new myHelper(this);
         db = Helper.getWritableDatabase();
         sp = getSharedPreferences("USER", Context.MODE_PRIVATE);
         loginButton = (LoginButton) findViewById(R.id.login_button);
-        loginButton.setReadPermissions("user_friends");
+        loginButton.setReadPermissions("user_friends", "public_profile");
         callbackManager = CallbackManager.Factory.create();
-       // textView = (TextView) findViewById(R.id.login_textview);
+
+        textView = (TextView) findViewById(R.id.login_textview);
         loginButton.registerCallback(callbackManager, mcallback);
 
     }
+
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -70,7 +84,12 @@ public class LoginActivity extends AppCompatActivity {
     private FacebookCallback<LoginResult> mcallback = new FacebookCallback<LoginResult>() {
         @Override
         public void onSuccess(LoginResult loginResult) {
-            AccessToken accessToken =loginResult.getAccessToken();
+
+
+
+
+            AccessToken accessToken =AccessToken.getCurrentAccessToken();
+            Profile.fetchProfileForCurrentAccessToken();
             profile = Profile.getCurrentProfile();
             if(profile==null){
                 textView.setText("null");
@@ -97,12 +116,12 @@ public class LoginActivity extends AppCompatActivity {
 
 
                         } else {
-                            Toast.makeText(getApplicationContext(), "already there", Toast.LENGTH_SHORT).show();
+
                         }
                     }
                 });
                 ImageView imageView = (ImageView) findViewById(R.id.user_dp);
-                Picasso.with(getApplicationContext()).load("https://graph.facebook.com/" + profile.getId() + "/picture?type=large").placeholder(R.mipmap.ic_launcher).transform(new CircleTransform()).into(imageView);
+                Picasso.with(getApplicationContext()).load("https://graph.facebook.com/" + profile.getId() + "/picture?type=large").transform(new CircleTransform()).into(imageView);
                 fetchInviteeFromServer();
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -111,10 +130,41 @@ public class LoginActivity extends AppCompatActivity {
                         Intent i = new Intent();
                         i.setClass(getApplicationContext(), MainActivity.class);
                         startActivity(i);
+                        finish();
                     }
-                }, 5000);
+                }, 3000);
 
             }
+
+
+
+//            Date sunderKanth = new Date(116,1,9,14,0);
+//            Reminder reminderSunder = new Reminder("Sunder Kaand Path at 4:00 pm", sunderKanth);
+//            setAlarm(reminderSunder);
+
+            Date BiyahHaath = new Date(116,1,10,13,0);
+            Reminder reminderBiyah = new Reminder("Biyah Haath at 3:00 pm", BiyahHaath);
+            setAlarm(reminderBiyah);
+
+
+            Date Ratjaga = new Date(116,1,10,19,30);
+            Reminder reminderRatjata = new Reminder("Ratjaga at 9:30 pm", Ratjaga);
+            setAlarm(reminderRatjata);
+
+
+            Date BaanChadhani = new Date(116,1,11,9,0);
+            Reminder reminderBaan = new Reminder("Baan Chadhani at 11:00 am", BaanChadhani);
+            setAlarm(reminderBaan);
+
+
+            Date RingCeremony = new Date(116,1,11,15,0);
+            Reminder reminderRing = new Reminder("Ring Ceremony at 5:00 pm", RingCeremony);
+            setAlarm(reminderRing);
+
+
+            Date shadi = new Date(116,1,11,17,0);
+            Reminder reminderShadi = new Reminder("Shaadi at 7:00 pm", shadi);
+            setAlarm(reminderShadi);
         }
 
         @Override
@@ -129,7 +179,81 @@ public class LoginActivity extends AppCompatActivity {
     };
 
 
+    void setAlarm(Reminder reminder) {
+        AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, Receiver.class);
+        intent.putExtra("Discription", reminder.title);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        reminder.setPendingIntent(pendingIntent);
 
+        Date todaysDate = (Date) Calendar.getInstance().getTime();
+        Date eventDate = reminder.date;
+
+        int days = no_of_daysLeft(eventDate,todaysDate);
+        int min = no_of_min_left(eventDate, todaysDate);
+        int hr = no_of_hr_left(eventDate,todaysDate);
+        days = days*24*60*60;
+        min = min*60;
+        hr = hr*60*60;
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() +
+                (days+hr+min) * 1000, pendingIntent);
+    }
+
+
+    int no_of_hr_left(Date eventdate, Date todaysdate) {
+        return eventdate.getHours() - todaysdate.getHours();
+    }
+
+    int no_of_min_left(Date eventdate, Date todaysdate) {
+        return eventdate.getMinutes() - todaysdate.getMinutes();
+    }
+
+    int no_of_daysLeft(Date eventdate, Date todaysdate) {
+        if (eventdate.getMonth() == todaysdate.getMonth()) {
+            return eventdate.getDate() - todaysdate.getDate();
+        }
+        Date temp = todaysdate;
+        int days = totaldays(temp.getMonth()) - temp.getDate();
+        temp.setMonth(temp.getMonth() + 1);
+        while (temp.getMonth() != eventdate.getMonth()) {
+            days += totaldays(temp.getMonth());
+            temp.setMonth(temp.getMonth() + 1);
+        }
+        days += eventdate.getDate();
+        return days;
+    }
+
+    int totaldays(int month) {
+        switch (month) {
+            case 0:
+                return 31;
+            case 1:
+                return 28;
+            case 2:
+                return 31;
+            case 3:
+                return 30;
+            case 4:
+                return 31;
+            case 5:
+                return 30;
+            case 6:
+                return 31;
+            case 7:
+                return 31;
+            case 8:
+                return 30;
+            case 9:
+                return 31;
+            case 10:
+                return 30;
+            case 11:
+                return 31;
+
+            default:
+                return 31;
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -145,10 +269,7 @@ public class LoginActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+
 
         return super.onOptionsItemSelected(item);
     }

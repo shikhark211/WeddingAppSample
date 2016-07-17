@@ -8,13 +8,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
+
 import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
 
-public class CropActivity extends Activity {
+import Helper.BitmapHelperClass;
+
+public class CropActivity extends Activity implements BitmapHelperClass.myHelper {
 
     private ImageView resultView;
+    Uri outputUri;
+    Uri inputUri;
+    Uri finalInputUri;
+    String actualPath;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,11 +30,17 @@ public class CropActivity extends Activity {
         setContentView(R.layout.activity_crop);
         resultView = (ImageView) findViewById(R.id.result_image);
         Intent i = getIntent();
-        Uri inputUri = (Uri) i.getExtras().get("fullPhotoUri");
-        Crop.of(inputUri, outputUri).asSquare().start(this);
+        inputUri = (Uri) i.getExtras().get("fullPhotoUri");
+        actualPath = i.getExtras().getString("ActualPath");
+        BitmapHelperClass task = new BitmapHelperClass(inputUri, this.getContentResolver(), this,actualPath);
+        task.listener = this;
+        task.execute();
+        outputUri = Uri.fromFile(new File(getCacheDir(), "cropped"));
 
+        Crop.of(finalInputUri, outputUri).asSquare().start(this);
 
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -36,20 +50,17 @@ public class CropActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_select) {
-            resultView.setImageDrawable(null);
-            Crop.pickImage(this);
-            return true;
-        }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent result) {
-        if (requestCode == Crop.REQUEST_PICK && resultCode == RESULT_OK) {
-            beginCrop(result.getData());
-        } else if (requestCode == Crop.REQUEST_CROP) {
-            handleCrop(resultCode, result);
+        if (requestCode == Crop.REQUEST_CROP && resultCode == RESULT_OK) {
+            Intent intent = new Intent();
+            intent.setClass(this, PostAddActivity.class);
+            intent.putExtra("fullPhotoUri", outputUri);
+            startActivity(intent);
+            finish();
         }
     }
 
@@ -66,4 +77,9 @@ public class CropActivity extends Activity {
         }
     }
 
+    @Override
+    public void passUri(Uri uri) {
+        finalInputUri = uri;
+        Crop.of(finalInputUri, outputUri).asSquare().start(this);
+    }
 }

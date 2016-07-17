@@ -1,6 +1,8 @@
 package Helper;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,12 +41,19 @@ public class InviteeAdapter extends RecyclerView.Adapter<InviteeAdapter.ViewHold
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, int i) {
-        Picasso.with(context).load("https://graph.facebook.com/" + inviteeList.get(i).getFbId() + "/picture?type=small")
-                .placeholder(R.mipmap.ic_launcher)
+    public void onBindViewHolder(ViewHolder viewHolder, final int i) {
+        Picasso.with(context).load("https://graph.facebook.com/" + inviteeList.get(i).getFbId() + "/picture?type=normal").placeholder(R.drawable.appicon)
                 .transform(new CircleTransform())
                 .into(viewHolder.dp);
         viewHolder.Inviteename.setText(inviteeList.get(i).getName());
+        viewHolder.Inviteename.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.facebook.com/" + inviteeList.get(i).getFbId()));
+                browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(browserIntent);
+            }
+        });
     }
 
 
